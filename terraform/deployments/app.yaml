@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: applications
+  namespace: argo-cd
+spec:
+  destination:
+    namespace: argo-cd
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: gitops/gitops-apps
+    repoURL: https://github.com/jbrmg/gitops-techtalk.git
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+      limit: 2
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true

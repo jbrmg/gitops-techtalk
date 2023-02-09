@@ -1,0 +1,39 @@
+{{- range $app := .Values.applications }}
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: {{ $app.name }}
+  namespace: argo-cd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+  labels:
+    {{- include "app.labels" $ | nindent 4 }}
+spec:
+  project: default
+  source:
+    repoURL: {{ $.Values.repoUrl }}
+    targetRevision: {{ $.Values.targetRevision }}
+    path: "gitops/{{ $app.name }}"
+  destination:
+    namespace: {{ $app.namespace | default $.Values.defaultNamespace }}
+    server: https://kubernetes.default.svc
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
+    syncOptions:
+      - Validate=true
+      - ApplyOutOfSyncOnly=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=false
+      - Replace=false
+      - CreateNamespace=true
+    retry:
+      limit: 10
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
+{{- end }}
