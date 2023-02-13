@@ -68,10 +68,10 @@ resource "kubernetes_manifest" "secret_store" {
   manifest   = yamldecode(file("${path.module}/deployments/secret-store.yaml"))
   depends_on = [helm_release.external_secrets]
 }
-resource "kubernetes_secret" "aws_credentials" {
+resource "kubernetes_secret" "store_credentials" {
   metadata {
     name      = "vault-token"
-    namespace = "external-secrets"
+    namespace = "default"
   }
   type = "Opaque"
   data = {

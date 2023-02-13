@@ -3,8 +3,8 @@ targetRevision: HEAD # substituted by gitlab ci
 defaultNamespace: default
 
 applications:
-  - name: sealed-secrets
-    namespace: sealed-secrets
+  - name: dummy
+    namespace: default
   - name: nginx
     namespace: nginx
 
