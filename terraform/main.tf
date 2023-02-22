@@ -17,7 +17,7 @@ terraform {
 
 provider "kubernetes" {
   config_path    = "~/.kube/config"
-  config_context = "minikube"
+  config_context = "docker-desktop"
 }
 
 
@@ -28,7 +28,7 @@ provider "vault" {
 provider "helm" {
   kubernetes {
     config_path    = "~/.kube/config"
-    config_context = "minikube"
+    config_context = "docker-desktop"
   }
 }
 
@@ -46,15 +46,14 @@ resource "helm_release" "argocd" {
   chart            = "argo-cd"
   name             = "argo-cd"
   namespace        = "argo-cd"
-  version          = "5.19.0"
+  version          = "5.22.1"
   create_namespace = true
 }
+
 resource "kubernetes_manifest" "bootstrap_app" {
   manifest = yamldecode(file("${path.module}/deployments/app.yaml"))
-
   depends_on = [helm_release.argocd]
 }
-
 
 resource "helm_release" "external_secrets" {
   chart            = "external-secrets"
@@ -64,10 +63,12 @@ resource "helm_release" "external_secrets" {
   namespace        = "external-secrets"
   create_namespace = true
 }
+
 resource "kubernetes_manifest" "secret_store" {
   manifest   = yamldecode(file("${path.module}/deployments/secret-store.yaml"))
   depends_on = [helm_release.external_secrets]
 }
+
 resource "kubernetes_secret" "store_credentials" {
   metadata {
     name      = "vault-token"
@@ -79,7 +80,6 @@ resource "kubernetes_secret" "store_credentials" {
   }
   depends_on = [helm_release.external_secrets]
 }
-
 
 resource "vault_mount" "kvv2" {
   path        = "example"

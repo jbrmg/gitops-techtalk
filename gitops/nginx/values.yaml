@@ -2,3 +2,6 @@ ingress-nginx:
   controller:
     service:
       enabled: false
+    # TODO: remove :)
+    image:
+      registry: my-private-registry.com
